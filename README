@@ -1,0 +1,70 @@
+# 📦 Products API
+
+Una API RESTful construida en Go para gestionar productos, utilizando Gin y Firebase Firestore.
+
+## ✨ Características
+
+- **CRUD completo** para productos.
+- **Filtros avanzados** para listar productos por SKU, categoría, marca o estado.
+- **Búsqueda simple** por nombre.
+- **Autenticación segura** mediante API Key.
+- **Integración modular** con la librería de Firebase existente.
+- **Soft Deletes**: Los productos se desactivan en lugar de eliminarse permanentemente.
+
+## ⚙️ Configuración
+
+1.  **Clona el repositorio** y navega al directorio `products-api`.
+2.  **Crea tu archivo de entorno**: `cp .env.example .env`.
+3.  **Edita el archivo `.env`**:
+    - Define un `PORT` (ej. `8082`).
+    - Establece una `API_KEY` segura.
+    - Configura tus credenciales de Firebase.
+4.  **Instala las dependencias**: `go mod tidy`.
+
+## 🚀 Uso
+
+### Iniciar el servidor
+
+```bash
+go run cmd/api/main.go
+```
+
+### Endpoints de la API
+
+| Método   | Endpoint               | Descripción                                           | Requiere Auth |
+| :------- | :--------------------- | :---------------------------------------------------- | :------------ |
+| `GET`    | `/api/v1/products`     | Lista productos con filtros (`sku`, `category`, `q`). | No            |
+| `GET`    | `/api/v1/products/:id` | Obtiene un producto por su ID.                        | No            |
+| `POST`   | `/api/v1/products`     | Crea un nuevo producto.                               | **Sí**        |
+| `PATCH`  | `/api/v1/products/:id` | Actualiza un producto existente.                      | **Sí**        |
+| `DELETE` | `/api/v1/products/:id` | Desactiva un producto (soft delete).                  | **Sí**        |
+
+### 💻 Ejemplos con `curl`
+
+**Crear un nuevo producto (requiere autenticación):**
+
+```bash
+curl -X POST http://localhost:8082/api/v1/products \
+  -H "Content-Type: application/json" \
+  -H "X-API-KEY: my-super-secret-key" \
+  -d '{
+    "id": "prod-002",
+    "sku": "JEANS-BLUE-32",
+    "name": "Jeans Azules Talla 32",
+    "brand": "MarcaY",
+    "category": "Ropa/Hombre/Pantalones",
+    "price": 150000,
+    "currency": "COP"
+  }'
+```
+
+**Actualizar el precio de un producto:**
+
+```bash
+curl -X PATCH http://localhost:8082/api/v1/products/prod-002 \
+  -H "Content-Type: application/json" \
+  -H "X-API-KEY: my-super-secret-key" \
+  -d '{
+    "price": 155000
+  }'
+```
