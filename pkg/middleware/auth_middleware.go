@@ -35,17 +35,20 @@ func SessionAuthMiddleware() gin.HandlerFunc {
 		sessionID := c.GetHeader("X-Session-ID")
 		clientSubdomain := c.GetHeader("X-Client-Subdomain")
 
+		if clientSubdomain != "" {
+			c.Set("subdomain", clientSubdomain)
+		}
+
 		// Si no hay sesión, simplemente continuamos. Las rutas decidirán si requieren los datos.
 		if sessionID == "" {
 			c.Next()
 			return
 		}
-		
+
 		if clientSubdomain == "" {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "X-Client-Subdomain header is required when providing a session."})
 			return
 		}
-
 
 		// 1. Validar la sesión usando tu librería de auth
 		sessionInfo, err := auth.ValidateSession(context.Background(), sessionID)
@@ -53,13 +56,13 @@ func SessionAuthMiddleware() gin.HandlerFunc {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired session."})
 			return
 		}
-		
+
 		// 2. Si la sesión es válida, inyectamos los datos del usuario en el contexto
 		// para que los handlers puedan usarlos.
 		c.Set("uid", sessionInfo.UID)
 		c.Set("claims", sessionInfo.Claims)
 		c.Set("subdomain", clientSubdomain) // Usamos el subdomain que el cliente envía
-		
+
 		c.Next()
 	}
 }
